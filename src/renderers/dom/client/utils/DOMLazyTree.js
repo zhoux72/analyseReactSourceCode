@@ -25,6 +25,7 @@ var setTextContent = require('setTextContent');
  *
  * See https://github.com/spicyj/innerhtml-vs-createelement-vs-clonenode.
  */
+ //在IE (8-11)和Edge浏览器中为true，其余浏览器为false
 var enableLazy = (
   typeof document !== 'undefined' &&
   typeof document.documentMode === 'number'
@@ -98,7 +99,13 @@ function queueText(tree, text) {
 
 function DOMLazyTree(node) {
   return {
+    //node用于保存当前的完整的节点，node为HTML原生的Node类型
     node: node,
+    //IE浏览器下一次性将所有子节点都挂载到父级节点性能更好，将这种挂载方式定义为懒挂载
+    //其余浏览器下每个节点都单独appendChild反而性能更好，定义这种运行环境为不支持懒挂载（自己命名的，便于理解）
+    //children用于保存赖挂载的节点，如果运行环境支持懒挂载，则不会在挂载每个节点时都执行parentTree.node.appendChild(childTree.node)
+    //会先执行parentTree.children.push(childTree)，将其保存到children中，所有节点添加完毕，再一次插入，性能更好
+    //如果运行环境不支持懒挂载的话，会在挂载每个节点时都执行appendChild
     children: [],
     html: null,
     text: null,

@@ -79,16 +79,21 @@ Object.assign(ReactDOMTextComponent.prototype, {
         validateDOMNesting('#text', this, parentInfo);
       }
     }
-
+    //获取父级组件信息中保存的_idCounter，赋值给当前正在挂载的组件的_domID属性，并将父级组件信息中保存的_idCounter加1，以备在该父级组件下再挂载其他组件时使用
     var domID = nativeContainerInfo._idCounter++;
     var openingValue = ' react-text: ' + domID + ' ';
     var closingValue = ' /react-text ';
     this._domID = domID;
     this._nativeParent = nativeParent;
+    //如果使用createElement创建文本标签，则返回DOMLazyTree类型的对象，其中的node或children属性中保存了带注释的节点内容
     if (transaction.useCreateElement) {
       var ownerDocument = nativeContainerInfo._ownerDocument;
+      //开始注释<!-- react-text:1(domID) -->
+      //ownerDocument的createComment、createDocumentFragment、createTextNode等方法在src\shared\vendor\third_party\webcomponents.js中做了定义处理，具体细节没看明白
       var openingComment = ownerDocument.createComment(openingValue);
+      //结束注释<!-- /react-text -->
       var closingComment = ownerDocument.createComment(closingValue);
+      //利用DOMLazyTree将开始注释、文本内容、结束注释插入到DOMLazyTree中并返回
       var lazyTree = DOMLazyTree(ownerDocument.createDocumentFragment());
       DOMLazyTree.queueChild(lazyTree, DOMLazyTree(openingComment));
       if (this._stringText) {
@@ -98,19 +103,21 @@ Object.assign(ReactDOMTextComponent.prototype, {
         );
       }
       DOMLazyTree.queueChild(lazyTree, DOMLazyTree(closingComment));
+      //暂时不清楚具体作用
       ReactDOMComponentTree.precacheNode(this, openingComment);
       this._closingComment = closingComment;
       return lazyTree;
     } else {
+      //转义_stringText中可能存在的&、>、<、"、'
       var escapedText = escapeTextContentForBrowser(this._stringText);
-
+      //静态页面下直接返回文本
       if (transaction.renderToStaticMarkup) {
         // Normally we'd wrap this between comment nodes for the reasons stated
         // above, but since this is a situation where React won't take over
         // (static pages), we can simply return the text as it is.
         return escapedText;
       }
-
+      //如果不是使用createElement创建的文本标签，则返回字符串类型的带注释的节点
       return (
         '<!--' + openingValue + '-->' + escapedText +
         '<!--' + closingValue + '-->'

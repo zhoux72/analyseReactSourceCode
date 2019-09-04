@@ -93,7 +93,7 @@ function instantiateReactComponent(node) {
     // Special case string values
     if (typeof element.type === 'string') {
       //DOM标签组件
-      //返回的instance实例tag属性为element.type的小写形式，_flags等于0
+      //返回的ReactDOMComponent类型的instance实例tag属性为element.type的小写形式，_flags等于0
       //_currentElement、_tag、_namespaceURI、_renderedChildren、_rootNodeID、_domID等属性均为null
       //原型方法上挂载了mountComponent、receiveComponent、updateComponent、getNativeNode、unmountComponent、getPublicInstance方法
       instance = ReactNativeComponent.createInternalComponent(element);
@@ -115,7 +115,7 @@ function instantiateReactComponent(node) {
     }
   } else if (typeof node === 'string' || typeof node === 'number') {
     //typeof node === 'string' || typeof node === 'number'表示文本组件
-    //返回的instance实例_currentElement为node、_stringText为node的字符串形式，_mountIndex为0
+    //返回的ReactDOMTextComponent类型的instance实例_currentElement为node、_stringText为node的字符串形式，_mountIndex为0
     //_nativeNode、_nativeParent、_domID、_closingComment、_commentNodes为null
     //原型方法上挂载了mountComponent、receiveComponent、getNativeNode、unmountComponent方法
     instance = ReactNativeComponent.createInstanceForText(node);
